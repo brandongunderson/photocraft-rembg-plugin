@@ -27,5 +27,5 @@ for package in sorted(packages.values(), key=lambda p:(p['name'],p['version'])):
     for path in files:
         parts.append(f'\n--- {path.relative_to(folder).as_posix()} ---\n{path.read_text(encoding="utf-8",errors="replace")}\n')
 (ROOT / 'licenses').mkdir(exist_ok=True)
-(ROOT / 'licenses/rust-dependencies-api2.txt').write_text('\n'.join(parts), encoding='utf-8')
+(ROOT / 'licenses/rust-panel-dependencies.txt').write_text('\n'.join(parts), encoding='utf-8')
 print(f'Collected license texts for {len(packages)} pinned Rust packages.')

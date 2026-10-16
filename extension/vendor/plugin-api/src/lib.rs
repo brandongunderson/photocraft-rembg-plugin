@@ -1,4 +1,4 @@
-//! Standalone, data-only contracts for PhotoCraft plugin API 2.
+//! Standalone, data-only contracts for the PhotoCraft Plugin API.
 //!
 //! No editor, UI, image or plugin implementation is a dependency of this crate.
 //! Deserialization is followed by explicit validation at every trust boundary.
@@ -31,7 +31,7 @@ use serde_json::{Value, json};
 
 /// Contract metadata version. Independent of the panel, filter and package ABIs.
 pub const HOST_API_VERSION: u16 = 1;
-pub const PANEL_API_VERSION: u32 = 2;
+pub const PANEL_API_VERSION: u32 = 1;
 pub const MAX_DESCRIPTOR_BYTES: usize = 64 * 1024;
 pub const MAX_RESPONSE_BYTES: usize = 256 * 1024;
 pub const MAX_STATE_BYTES: usize = 128 * 1024;

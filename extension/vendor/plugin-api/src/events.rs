@@ -1,15 +1,16 @@
-//! Host-to-guest events for the supported panel-2 contract.
+//! Host-to-guest events for the current PhotoCraft Plugin API.
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::{ApiError, ErrorCode, HostApi, MAX_RESPONSE_BYTES, MAX_STATE_BYTES, NegotiatedCapabilities, Result, json_size};
 
-/// Additional event-envelope fields may be ignored by old guests. Descriptors and effects
+/// Guests may ignore additional event-envelope fields. Descriptors and effects
 /// remain strict. Unknown events must be handled without inventing new host authority.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct EventRequest {
+    #[cfg_attr(feature = "schema", schemars(range(min = 1, max = 1)))]
     pub api_version: u32,
     pub host: HostApi,
     #[serde(default)]
@@ -29,6 +30,7 @@ pub struct EventRequest {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct Compatibility {
+    #[cfg_attr(feature = "schema", schemars(range(min = 1, max = 1)))]
     pub panel_api: u32,
     pub host_api: u16,
     pub negotiated: NegotiatedCapabilities,
@@ -70,7 +72,7 @@ impl EventRequest {
 
     pub fn validate(&self) -> Result<()> {
         if self.api_version != crate::PANEL_API_VERSION {
-            return Err(ApiError::new(ErrorCode::IncompatibleApi, "guest requires panel API 2"));
+            return Err(ApiError::new(ErrorCode::IncompatibleApi, "guest requires the current PhotoCraft Plugin API"));
         }
         self.host.validate()?;
         if self.compatibility.as_ref().is_some_and(|selected| selected.panel_api != self.api_version || selected.host_api != self.host.version) {

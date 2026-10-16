@@ -2,10 +2,10 @@
 
 Read README.md, authoring.json, extension/src/lib.rs and the worker sources before editing.
 Keep dependencies, models and algorithms in this project. No editor or sibling checkout paths.
-Target panel API 2 through the privately vendored SDK 0.1; API 1 panels are retired.
+Target the PhotoCraft Plugin API through the privately vendored SDK 0.1.
 Edit authoring.json for identity, controls, required capabilities and package metadata.
 Cargo generates the embedded manifest/bindings; packaging derives package.json from that source.
-Keep the stable plugin id on updates. Panel API 2, package format 2, native image/task
+Keep the stable plugin id on updates. The Plugin API, package format 2, native image/task
 protocol 1 and filter ABI 1 are independent versions. Do not change worker protocols implicitly.
 The SDK macro owns bounded ABI storage. Never add raw pointer access, host imports or leaked buffers.
 Accept additive host metadata, preserve state, and issue no effects for observer/unknown events.

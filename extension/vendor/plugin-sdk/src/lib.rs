@@ -81,7 +81,7 @@ pub fn packed(bytes: &[u8]) -> u64 {
     (u64::from(length) << 32) | u64::from(pointer)
 }
 
-/// Export the four existing import-free panel-2 entry points. Rust 2024's narrow unsafe
+/// Export the four import-free PhotoCraft Plugin API entry points. Rust 2024's narrow unsafe
 /// export attributes name symbols only: generated functions contain no unsafe operations.
 #[macro_export]
 macro_rules! export_plugin {
@@ -118,7 +118,7 @@ mod tests {
     use serde_json::json;
 
     fn request(state: serde_json::Value) -> Vec<u8> {
-        serde_json::to_vec(&json!({"apiVersion":2,"host":{"version":1,"capabilities":[]},"event":"info","values":{},"state":state})).unwrap()
+        serde_json::to_vec(&json!({"apiVersion":1,"host":{"version":1,"capabilities":[]},"event":"info","values":{},"state":state})).unwrap()
     }
 
     #[test]

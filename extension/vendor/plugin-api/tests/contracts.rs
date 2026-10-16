@@ -2,7 +2,7 @@ use photocraft_plugin_api::*;
 use serde_json::{Value, json};
 
 fn descriptor() -> Value {
-    json!({"apiVersion":2,"id":"org.example.layers","name":"Layer Organizer","version":"0.1.0",
+    json!({"apiVersion":1,"id":"org.example.layers","name":"Layer Organizer","version":"0.1.0",
         "permissions":{"documentRead":true,"commands":[]},
         "panel":{"fields":[{"id":"visible","label":"Visible","type":"bool","default":true}],"buttons":[{"id":"apply","label":"Apply"}]},
         "capabilities":{"required":[{"id":"host.document.edit","minVersion":1,"maxVersion":1}],"optional":[{"id":"future.optional","minVersion":1}]},
@@ -16,6 +16,82 @@ fn complete_descriptor_round_trip_is_independent_of_editor_types() {
     let second = Descriptor::parse(&serde_json::to_vec(&first).unwrap()).unwrap();
     assert_eq!(first, second);
     assert_eq!(first.contributes.commands[0].event, "organize");
+}
+
+#[test]
+fn optional_repository_and_plugin_owned_update_source_round_trip() {
+    let original = Descriptor::parse(&serde_json::to_vec(&descriptor()).unwrap()).unwrap();
+    let serialized = serde_json::to_value(&original).unwrap();
+    assert!(serialized.get("repository").is_none());
+    assert!(serialized.get("updates").is_none());
+    let mut value = descriptor();
+    value["repository"] = json!("https://github.com/example-org/independent-plugin");
+    value["updates"] = json!({"provider":"github","asset":"Independent-{platform}.pcplugin"});
+    let parsed = Descriptor::parse(&serde_json::to_vec(&value).unwrap()).unwrap();
+    assert_eq!(github_repository_parts(parsed.repository.as_deref().unwrap()).unwrap(), ("example-org", "independent-plugin"));
+    let source = parsed.updates.as_ref().unwrap();
+    assert_eq!(source.provider, UpdateProvider::Github);
+    for platform in ["windows-x86_64", "windows-aarch64", "linux-x86_64", "linux-aarch64", "macos-x86_64", "macos-aarch64"] {
+        assert_eq!(source.asset_for_platform(platform).unwrap(), format!("Independent-{platform}.pcplugin"));
+    }
+    assert!(source.asset_for_platform("../other").is_err());
+    assert_eq!(Descriptor::parse(&serde_json::to_vec(&parsed).unwrap()).unwrap(), parsed);
+    value["updates"] = json!({"provider":"github","asset":"Independent.pcext"});
+    assert_eq!(
+        Descriptor::parse(&serde_json::to_vec(&value).unwrap()).unwrap().updates.unwrap().asset_for_platform("linux-x86_64").unwrap(),
+        "Independent.pcext"
+    );
+}
+
+#[test]
+fn update_sources_reject_ambiguous_repositories_and_unsafe_asset_templates() {
+    let mut value = descriptor();
+    value["updates"] = json!({"provider":"github","asset":"Independent.pcplugin"});
+    assert!(Descriptor::parse(&serde_json::to_vec(&value).unwrap()).is_err());
+    for repository in [
+        "http://github.com/example/plugin",
+        "https://github.com.evil.test/example/plugin",
+        "https://github.com@example.test/example/plugin",
+        "https://github.com/example/plugin.git",
+        "https://github.com/example/plugin/",
+        "https://github.com/example/plugin/releases",
+        "https://github.com/example/plugin?token=secret",
+        "https://github.com/example/plugin#fragment",
+        "https://github.com/example/..",
+        "https://github.com/-example/plugin",
+        "https://github.com/example--org/plugin",
+        "https://github.com/example/%70lugin",
+        "https://github.com/example/plug\nin",
+    ] {
+        value["repository"] = json!(repository);
+        assert!(Descriptor::parse(&serde_json::to_vec(&value).unwrap()).is_err(), "{repository:?}");
+    }
+    value["repository"] = json!("https://github.com/example/plugin");
+    for asset in [
+        "",
+        "../plugin.pcplugin",
+        "folder/plugin.pcplugin",
+        "folder\\plugin.pcplugin",
+        "plugin*.pcplugin",
+        "plugin-{version}.pcplugin",
+        "plugin-{platform}-{platform}.pcplugin",
+        "plugin.{platform}.zip",
+        "plugin.pcplugin?x=1",
+        "NUL.pcplugin",
+        ".plugin.pcplugin",
+        "plugin.PCPLUGIN",
+    ] {
+        value["updates"] = json!({"provider":"github","asset":asset});
+        assert!(Descriptor::parse(&serde_json::to_vec(&value).unwrap()).is_err(), "{asset:?}");
+    }
+    value["updates"] = json!({"provider":"github","asset":format!("{}.pcplugin", "a".repeat(160))});
+    assert!(Descriptor::parse(&serde_json::to_vec(&value).unwrap()).is_err());
+    value["updates"] = json!({"provider":"other","asset":"plugin.pcplugin"});
+    assert!(Descriptor::parse(&serde_json::to_vec(&value).unwrap()).is_err());
+    value["updates"] = json!({"provider":"github","asset":"plugin.pcplugin","url":"https://example.test"});
+    assert!(Descriptor::parse(&serde_json::to_vec(&value).unwrap()).is_err());
+    value["updates"] = serde_json::Value::Null;
+    assert!(Descriptor::parse(&serde_json::to_vec(&value).unwrap()).is_ok());
 }
 
 #[test]
@@ -35,7 +111,7 @@ fn missing_required_and_wrong_version_have_structured_errors_optional_falls_back
 #[test]
 fn malformed_duplicate_and_unbounded_descriptors_fail_without_panicking() {
     for (pointer, invalid) in [
-        ("/apiVersion", json!(1)),
+        ("/apiVersion", json!(0)),
         ("/id", json!("../escape")),
         ("/name", json!("\u{202e}Layers")),
         ("/capabilities/required/0/minVersion", json!(0)),
@@ -57,7 +133,7 @@ fn malformed_duplicate_and_unbounded_descriptors_fail_without_panicking() {
     assert!(Descriptor::parse(&serde_json::to_vec(&value).unwrap()).is_err());
     assert!(Descriptor::parse(&vec![b' '; MAX_DESCRIPTOR_BYTES + 1]).is_err());
     assert!(Descriptor::parse(&[0xff]).is_err());
-    assert!(Descriptor::parse(br#"{"apiVersion":2,"apiVersion":2}"#).is_err());
+    assert!(Descriptor::parse(br#"{"apiVersion":1,"apiVersion":1}"#).is_err());
     let nested = format!("{}0{}", "[".repeat(1024), "]".repeat(1024));
     assert!(Descriptor::parse(nested.as_bytes()).is_err());
 }
@@ -123,8 +199,8 @@ fn checked_in_json_schemas_match_rust_contract_generation() {
 
 #[test]
 fn actual_host_envelope_and_nullable_replies_decode_with_future_event_fields() {
-    let mut request = json!({"apiVersion":2,"host":{"version":1,"capabilities":[]},
-        "compatibility":{"panelApi":2,"hostApi":1,"negotiated":{"available":[],"unavailableOptional":[]}},
+    let mut request = json!({"apiVersion":1,"host":{"version":1,"capabilities":[]},
+        "compatibility":{"panelApi":1,"hostApi":1,"negotiated":{"available":[],"unavailableOptional":[]}},
         "event":"host_response","values":{},"state":{"saved":7},"document":null,
         "responses":[{"id":"read","result":null}],"futureOptionalField":{"version":1}});
     let event = EventRequest::parse(&serde_json::to_vec(&request).unwrap()).unwrap();
@@ -138,9 +214,9 @@ fn actual_host_envelope_and_nullable_replies_decode_with_future_event_fields() {
 
 #[test]
 fn invalid_versions_duplicate_replies_and_oversized_state_fail_before_a_handler() {
-    let event = json!({"apiVersion":2,"host":{"version":1,"capabilities":[]},"event":"info","state":null});
+    let event = json!({"apiVersion":1,"host":{"version":1,"capabilities":[]},"event":"info","state":null});
     for change in [
-        json!({"apiVersion":1}),
+        json!({"apiVersion":0}),
         json!({"event":"_reserved"}),
         json!({"responses":[{"id":"r","result":{}},{"id":"r","result":{}}]}),
         json!({"state":"x".repeat(129*1024)}),

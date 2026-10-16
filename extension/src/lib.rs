@@ -228,11 +228,11 @@ photocraft_plugin_sdk::export_plugin!(bindings::MANIFEST_JSON, handle_event);
 mod tests {
     use super::*;
 
-    // Existing feature cases also pass through the actual API-2 SDK request/response boundary.
+    // Existing feature cases also pass through the PhotoCraft Plugin API request/response boundary.
     fn handle(value: &Value) -> Value {
         let mut input = value.clone();
         if let Some(object) = input.as_object_mut() {
-            object.entry("apiVersion").or_insert(json!(2));
+            object.entry("apiVersion").or_insert(json!(1));
             object
                 .entry("host")
                 .or_insert(json!({"version":1,"capabilities":[]}));
@@ -251,17 +251,17 @@ mod tests {
     }
 
     #[test]
-    fn api2_metadata_is_additive_and_legacy_envelopes_are_rejected() {
-        assert_eq!(photocraft_guest_api_version(), 2);
+    fn metadata_is_additive_and_unknown_versions_are_rejected() {
+        assert_eq!(photocraft_guest_api_version(), 1);
         let manifest: Value = serde_json::from_str(MANIFEST).unwrap();
-        assert_eq!(manifest["apiVersion"], 2);
+        assert_eq!(manifest["apiVersion"], 1);
         assert_eq!(
             manifest["capabilities"]["required"],
             json!([{"id":"host.commands.invoke","minVersion":1}])
         );
-        let base = json!({"apiVersion":2,"host":{"version":1,"capabilities":[]},
+        let base = json!({"apiVersion":1,"host":{"version":1,"capabilities":[]},
             "event":"init","values":{},"document":null,"state":{"saved":7},
-            "compatibility":{"panelApi":2,"hostApi":1,"negotiated":{"available":[{"id":"host.commands.invoke","version":1}],"unavailableOptional":[]}},
+            "compatibility":{"panelApi":1,"hostApi":1,"negotiated":{"available":[{"id":"host.commands.invoke","version":1}],"unavailableOptional":[]}},
             "futureHostMetadata":{"added":true}});
         EventRequest::parse(&serde_json::to_vec(&base).unwrap()).unwrap();
         let response = handle(&base);
@@ -278,11 +278,13 @@ mod tests {
             input["event"] = json!(event);
             assert_eq!(handle(&input)["commands"], json!([]));
         }
-        let mut old = base.clone();
-        old["apiVersion"] = json!(1);
-        assert!(EventRequest::parse(&serde_json::to_vec(&old).unwrap()).is_err());
-        let old = json!({"event":"init","values":{},"state":{}});
-        assert!(EventRequest::parse(&serde_json::to_vec(&old).unwrap()).is_err());
+        for version in [0, 3] {
+            let mut invalid = base.clone();
+            invalid["apiVersion"] = json!(version);
+            assert!(EventRequest::parse(&serde_json::to_vec(&invalid).unwrap()).is_err());
+        }
+        let missing_metadata = json!({"event":"init","values":{},"state":{}});
+        assert!(EventRequest::parse(&serde_json::to_vec(&missing_metadata).unwrap()).is_err());
     }
 
     fn request() -> Value {
@@ -308,7 +310,7 @@ mod tests {
         let manifest: Value = serde_json::from_str(MANIFEST).unwrap();
         assert_eq!(manifest["id"], "org.photocraft.rembg");
         assert_eq!(manifest["name"], "Rembg Background Removal");
-        assert_eq!(manifest["version"], "1.2.0");
+        assert_eq!(manifest["version"], "1.2.1");
         assert_eq!(
             manifest["permissions"],
             json!({"documentRead":true,"commands":["plugin.processImage","plugin.runTask"]})

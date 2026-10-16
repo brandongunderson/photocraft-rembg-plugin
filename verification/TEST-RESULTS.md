@@ -1,4 +1,4 @@
-> Current panel API 2 migration and package identity: [API2-MIGRATION.md](API2-MIGRATION.md). The results below identify their earlier validation artifact.
+> Current release checks and package hash: [API-COMPATIBILITY.md](API-COMPATIBILITY.md). The results below describe their historical validation artifact.
 
 # Rembg 1.1.0 validation
 

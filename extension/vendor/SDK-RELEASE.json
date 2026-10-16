@@ -16,9 +16,9 @@
       "sha256": "77c414bd870a0cc1a5ec06e7aeae0d379713d1d5d2d38e8d0903002e4d572537"
     },
     {
-      "bytes": 1713,
+      "bytes": 2202,
       "path": "plugin-api/README.md",
-      "sha256": "090bfcebcfc86fa48cbec88422d5f4ac8ecc4d3d362735ca4e88262cfe17d844"
+      "sha256": "3755f1578ad8280e0607f3cf244b784fa531362740d2016b3199f90facd94239"
     },
     {
       "bytes": 659,
@@ -26,68 +26,68 @@
       "sha256": "8eec821e923b7423b83fb5234829b11351fdf7b685d4dfc354121bc230c6e057"
     },
     {
-      "bytes": 11506,
-      "path": "plugin-api/schemas/authoring-v1.schema.json",
-      "sha256": "d1a9bead10d968e4959dce3d9239008945d7d26096dec8372d067b8bab0f463f"
+      "bytes": 12504,
+      "path": "plugin-api/schemas/authoring.schema.json",
+      "sha256": "7cf16fc52eb02e2c27d64ece183088d46b6f26157e840e5f59bdeb61405eefa8"
     },
     {
       "bytes": 1227,
-      "path": "plugin-api/schemas/host-api-v1.schema.json",
+      "path": "plugin-api/schemas/host-api.schema.json",
       "sha256": "4ff386f90759b055a94e3a272f0fce374e9606c1cd573d4cb7f8932faab01ca5"
     },
     {
       "bytes": 1223,
-      "path": "plugin-api/schemas/layers-edit-v1.schema.json",
+      "path": "plugin-api/schemas/layers-edit.schema.json",
       "sha256": "6be14c3a54bcebde0465d085ef5d8e271ed5a7ae365b0b5cd5c7c9e09e600354"
     },
     {
       "bytes": 386,
-      "path": "plugin-api/schemas/layers-edited-v1.schema.json",
+      "path": "plugin-api/schemas/layers-edited.schema.json",
       "sha256": "27e60ee040e818b2de22cf0170befba9b4b1eefff9c79a2b0d6450d1cb992392"
     },
     {
       "bytes": 875,
-      "path": "plugin-api/schemas/layers-read-v1.schema.json",
+      "path": "plugin-api/schemas/layers-read.schema.json",
       "sha256": "c9e049144fc26929311feeb1bec105eedbcc4059b1e2c39e53ffeea786dba213"
     },
     {
       "bytes": 2429,
-      "path": "plugin-api/schemas/layers-snapshot-v1.schema.json",
+      "path": "plugin-api/schemas/layers-snapshot.schema.json",
       "sha256": "edccf406baa4c0b940f15da46b0667428094885be0a84a9a4c3ed6ffb5fd6717"
     },
     {
       "bytes": 1296,
-      "path": "plugin-api/schemas/package-v2.schema.json",
+      "path": "plugin-api/schemas/package.schema.json",
       "sha256": "c8ef7ec333d79fb5e9557c6c8822939d26e0776f24c7e1a0e8cd02dd9c773075"
     },
     {
-      "bytes": 4958,
-      "path": "plugin-api/schemas/panel-v2-event.schema.json",
-      "sha256": "11b42d58d38207b9b3cd8265bf2d706843ed4cfe4b842699a9d33f9e08d022fc"
+      "bytes": 4991,
+      "path": "plugin-api/schemas/panel-event.schema.json",
+      "sha256": "db676ba5f99f1a4d91958f7122306e487750cf70251dc660afadaf4a01b2bb69"
     },
     {
-      "bytes": 2555,
-      "path": "plugin-api/schemas/panel-v2-response.schema.json",
-      "sha256": "71a71e297e62d02bc070016ca4e616170e80c9d38a06d8d761f668a22532cf8a"
+      "bytes": 2523,
+      "path": "plugin-api/schemas/panel-response.schema.json",
+      "sha256": "42a99fad480ff356acd7ff9d6c75a937037f9921ddd9c085f2ad49224cf69525"
     },
     {
-      "bytes": 9507,
-      "path": "plugin-api/schemas/panel-v2.schema.json",
-      "sha256": "82bbeabc291cb8f898ce8acd6c532f0f4f525440da4e39c350d905ce8042e1a2"
+      "bytes": 10437,
+      "path": "plugin-api/schemas/panel.schema.json",
+      "sha256": "177e27f34eb52f4be2c53d68d2cb633459af651ef5d79e111d7880d84722dddf"
     },
     {
       "bytes": 3642,
-      "path": "plugin-api/schemas/worker-v2-guest-frame.schema.json",
+      "path": "plugin-api/schemas/worker-guest-frame.schema.json",
       "sha256": "248296af1912e81453500993bf2d4fdc4f17eb62cce57a480164c5343abe6a84"
     },
     {
       "bytes": 2496,
-      "path": "plugin-api/schemas/worker-v2-host-frame.schema.json",
+      "path": "plugin-api/schemas/worker-host-frame.schema.json",
       "sha256": "554e4c70816228fca6087364998d1fa72d554651613894f7be780deebebbc0e5"
     },
     {
       "bytes": 2357,
-      "path": "plugin-api/schemas/worker-v2.schema.json",
+      "path": "plugin-api/schemas/worker.schema.json",
       "sha256": "5a8c5d3ac68904d02097516e913c5a3cae4e01f8b4dc5b50bb4f5efc84f8d654"
     },
     {
@@ -106,9 +106,9 @@
       "sha256": "b446b0083b169ea75554ae461fbbd2c19ed3c5d6fd9dfe05c268d5513a95e619"
     },
     {
-      "bytes": 8002,
+      "bytes": 12049,
       "path": "plugin-api/src/descriptor.rs",
-      "sha256": "516ad7a5d90718959160f4f21c36795613fd9eb7f7efdce9f43d6cf6aa3a210d"
+      "sha256": "b8edb6f6c5d18ef94cf6e9441e6447b0d750c9ed1d0c206cf4cf2331eaa08216"
     },
     {
       "bytes": 5008,
@@ -116,34 +116,34 @@
       "sha256": "7394755a3080963964144b3e02f76e576dc7dff5a3fb7518be65ad6182547343"
     },
     {
-      "bytes": 3877,
+      "bytes": 4035,
       "path": "plugin-api/src/events.rs",
-      "sha256": "f180f8bcc6fdfd8977686162e874382f3200c5addead6d0777e58337db78dfac"
+      "sha256": "29e4df542b9b338e1f1bdd315aa54696cf11df7c1d09d84840634337d65c0584"
     },
     {
-      "bytes": 3626,
+      "bytes": 3628,
       "path": "plugin-api/src/lib.rs",
-      "sha256": "53c1ab09cec4404a6ac04d575666a1430d07ce29e9f5b150f63adbdcc1c22146"
+      "sha256": "1d3eb62ed1d2bd6e952be9c9261ab2695b541ee08b37ff2343f845e133f910e8"
     },
     {
-      "bytes": 4040,
+      "bytes": 4008,
       "path": "plugin-api/src/protocol.rs",
-      "sha256": "2f0d6e4c268d1945abd1cf0b8f1d535a1a41a9fffb008060171397c3f8f7d572"
+      "sha256": "c15f51d6e71ab08cf761d173bdde59b9c193fd81e779959d0ed9cf1dee02d6b5"
     },
     {
-      "bytes": 2058,
+      "bytes": 1976,
       "path": "plugin-api/src/schema.rs",
-      "sha256": "b5788c446f884888f73fba54df9437594c190e4ef8953d0725523cd9811f2987"
+      "sha256": "14f609f3596fa05adf8073027cdd4cde1aea2cf6ce955abd4ec9530be47ec921"
     },
     {
-      "bytes": 14006,
+      "bytes": 14333,
       "path": "plugin-api/src/worker.rs",
-      "sha256": "6adaa9cb5cd7351ea1c1916074d09daea7ae8f9aaabfe7b7733bbddf7a1d3bfd"
+      "sha256": "da1070bb4ec516d6b7e0b4ef7c061ae9748b266eb403cb6fdc80f51e0a95b048"
     },
     {
-      "bytes": 12060,
+      "bytes": 15806,
       "path": "plugin-api/tests/contracts.rs",
-      "sha256": "8f8d4c09c460b49ed24d66da794254b4e0b9c18f337301ca774edd89a216d67c"
+      "sha256": "e25bfb90abcd30d0faf2ac0a7d98ed66a3f1b362ee5c50ad5f54ad2f0b8e2486"
     },
     {
       "bytes": 397,
@@ -161,23 +161,23 @@
       "sha256": "77c414bd870a0cc1a5ec06e7aeae0d379713d1d5d2d38e8d0903002e4d572537"
     },
     {
-      "bytes": 1745,
+      "bytes": 2192,
       "path": "plugin-sdk/README.md",
-      "sha256": "e44e1628c2f898a33c59a245d45963553a711c66e32e4f5b75b39fc974c2bba8"
+      "sha256": "e3cb529a70c2d0a6ee033408e61271e8d20ac3d895e7014de893004f5d346962"
     },
     {
-      "bytes": 3456,
+      "bytes": 3383,
       "path": "plugin-sdk/src/authoring.rs",
-      "sha256": "7fab17ab235d58ead603fc8e55197e398ee180f09fbe9e1668131b1aebe3d5a9"
+      "sha256": "5ae354b562e33ea928b5b4028a2f95fcd479024ee3e18942ccd8dff6cfbffa49"
     },
     {
-      "bytes": 7401,
+      "bytes": 7236,
       "path": "plugin-sdk/src/lib.rs",
-      "sha256": "fb935c2da0fef087d1f2421571c62c50d17df195754fd443a04711f3c5e0bf5d"
+      "sha256": "68af374614ded2061ab5eb438bef0a4eab13ef6ada4b6af6ed8a8e049d09a3aa"
     }
   ],
   "formatVersion": 1,
   "packageVersion": 2,
-  "panelApi": 2,
+  "panelApi": 1,
   "sdkVersion": "0.1.0"
 }
