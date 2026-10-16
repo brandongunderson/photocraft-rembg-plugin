@@ -1,0 +1,18 @@
+/target/
+/extension/target/
+/dist/
+# Downloaded runtime/model payloads are restored from pinned asset manifests.
+/runtime/*.zip
+/runtime/*.part
+/runtime/models/*.onnx
+/runtime/bin/*.dll
+/runtime/downloads/
+/runtime/cache/
+/verification/*.log
+/verification/*.png
+/verification/*.jpg
+# Machine-specific validation reports remain local; keep the release summaries in Git.
+/verification/*.json
+*.pcplugin
+__pycache__/
+*.pyc

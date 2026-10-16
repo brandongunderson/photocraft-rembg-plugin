@@ -1,0 +1,8 @@
+{
+  "apiVersion": 1,
+  "archive": "python-runtime.zip",
+  "sha256": "d26e09cf5ed131a6062274575edb7e0e7471167d43e558ea2d85077eac41e2b8",
+  "expandedBytes": 404092122,
+  "fileCount": 5442,
+  "python": "python.exe"
+}
