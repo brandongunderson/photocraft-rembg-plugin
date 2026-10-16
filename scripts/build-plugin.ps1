@@ -36,11 +36,21 @@ try {
     if ($peOffset -lt 0 -or $peOffset -gt $workerBytes.Length - 6 -or
         [BitConverter]::ToUInt32($workerBytes, $peOffset) -ne 17744 -or
         [BitConverter]::ToUInt16($workerBytes, $peOffset + 4) -ne 34404) { throw 'The processing supervisor must target Windows x86_64.' }
+    & $Python (Join-Path $PSScriptRoot 'collect-licenses.py')
+    if ($LASTEXITCODE -ne 0) { throw 'Dependency license collection failed.' }
     New-Item -ItemType Directory -Path $pluginStage -Force | Out-Null
-    foreach ($name in @('package.json', 'LICENSE', 'THIRD-PARTY-NOTICES.md', 'README.md', 'requirements.lock')) {
+    # The same authoring source generates the embedded panel descriptor and archive metadata.
+    $pluginAuthoring = Get-Content -LiteralPath (Join-Path $pluginRoot 'authoring.json') -Raw | ConvertFrom-Json
+    $pluginPackage = $pluginAuthoring.package | ConvertTo-Json -Depth 32
+    [IO.File]::WriteAllText((Join-Path $pluginStage 'package.json'), $pluginPackage, [Text.UTF8Encoding]::new($false))
+    New-Item -ItemType Directory -Path (Join-Path $pluginStage 'licenses/photocraft-sdk') -Force | Out-Null
+    Copy-Item -LiteralPath (Join-Path $pluginRoot 'extension/vendor/plugin-sdk/LICENSE-MIT') -Destination (Join-Path $pluginStage 'licenses/photocraft-sdk/LICENSE-MIT')
+    Copy-Item -LiteralPath (Join-Path $pluginRoot 'extension/vendor/plugin-sdk/LICENSE-APACHE') -Destination (Join-Path $pluginStage 'licenses/photocraft-sdk/LICENSE-APACHE')
+    Copy-Item -LiteralPath (Join-Path $pluginRoot 'extension/vendor/SDK-RELEASE.json') -Destination (Join-Path $pluginStage 'licenses/photocraft-sdk/SDK-RELEASE.json')
+    foreach ($name in @('LICENSE', 'THIRD-PARTY-NOTICES.md', 'README.md', 'requirements.lock')) {
         Copy-Item -LiteralPath (Join-Path $pluginRoot $name) -Destination $pluginStage
     }
-    Copy-Item -LiteralPath (Join-Path $pluginRoot 'licenses') -Destination $pluginStage -Recurse
+    Copy-Item -Path (Join-Path $pluginRoot 'licenses/*') -Destination (Join-Path $pluginStage 'licenses') -Recurse -Force
     Copy-Item -LiteralPath $worker -Destination $pluginStage
     Copy-Item -LiteralPath $panel -Destination (Join-Path $pluginStage 'plugin.pcext')
     New-Item -ItemType Directory -Path (Join-Path $pluginStage 'python'),(Join-Path $pluginStage 'runtime') -Force | Out-Null

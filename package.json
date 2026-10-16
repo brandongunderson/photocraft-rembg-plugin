@@ -1,9 +1,0 @@
-{
-  "packageVersion": 2,
-  "module": "plugin.pcext",
-  "native": {
-    "service": "plugin.processImage",
-    "platform": "windows-x86_64",
-    "entry": "photocraft-rembg-worker.exe"
-  }
-}

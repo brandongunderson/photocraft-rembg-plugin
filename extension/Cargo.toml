@@ -1,6 +1,6 @@
 [package]
 name = "photocraft-plugin-rembg"
-version = "1.1.0"
+version = "1.2.0"
 edition = "2024"
 rust-version = "1.95"
 license = "MIT"
@@ -8,12 +8,18 @@ publish = false
 description = "Independent Rembg Background Removal panel for PhotoCraft"
 
 [workspace]
+resolver = "3"
+members = ["."]
+exclude = ["vendor"]
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-serde_json = "1"
+photocraft-plugin-sdk = { path = "vendor/plugin-sdk", version = "0.1.0" }
+
+[build-dependencies]
+photocraft-plugin-sdk = { path = "vendor/plugin-sdk", version = "0.1.0", features = ["authoring"] }
 
 [profile.release]
 opt-level = "s"

@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 def sync(root, check=False):
-    manifest_path = root / 'extension/manifest.json'
+    manifest_path = root / 'authoring.json'
     manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
     catalog = json.loads((root / 'runtime/model-catalog.json').read_text(encoding='utf-8'))
     choices = []
@@ -16,7 +16,7 @@ def sync(root, check=False):
         choices.append(label)
     if not 2 < len(choices) <= 32 or len(choices) != len(set(choices)):
         raise ValueError('Model choices must be unique and bounded')
-    field = next(field for field in manifest['panel']['fields'] if field['id'] == 'model')
+    field = next(field for field in manifest['descriptor']['panel']['fields'] if field['id'] == 'model')
     expected = dict(field, options=choices, default=choices[0])
     if check:
         if field != expected:

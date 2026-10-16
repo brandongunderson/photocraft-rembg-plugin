@@ -1,14 +1,16 @@
 # Rembg Background Removal for PhotoCraft
 
-A PhotoCraft plugin using the [rembg Python library](https://github.com/danielgatis/rembg/tree/v2.0.85). Version **1.1.0** bundles rembg **2.0.85**, a private CPython 3.13 runtime, CPU inference libraries, and two local models. Download additional models through the plugin's pinned catalog. All controls and the comparison preview appear inside PhotoCraft; the package supplies its Python runtime.
+A PhotoCraft plugin using the [rembg Python library](https://github.com/danielgatis/rembg/tree/v2.0.85). Version **1.2.0** bundles rembg **2.0.85**, a private CPython 3.13 runtime, CPU inference libraries, and two local models. Download additional models through the plugin's pinned catalog. All controls and the comparison preview appear inside PhotoCraft; the package supplies its Python runtime.
 
 [Source repository](https://github.com/brandongunderson/photocraft-rembg-plugin)
+
+[Download the latest plugin](https://github.com/brandongunderson/photocraft-rembg-plugin/releases/latest/download/PhotoCraft-Rembg.pcplugin) · [All releases](https://github.com/brandongunderson/photocraft-rembg-plugin/releases)
 
 You can install this alongside [Background Removal](https://github.com/brandongunderson/photocraft-background-removal-plugin), which uses IMG.LY models through a Rust worker. Rembg uses the distinct id `org.photocraft.rembg`.
 
 ## Install and use
 
-1. Run the updated Windows x64 PhotoCraft build supporting package version 2, `plugin.processImage` and `plugin.runTask`. Version 1.1.0 needs the updated host for model actions; an older host rejects its unsupported permission during installation.
+1. Run the updated Windows x64 PhotoCraft build supporting panel API 2, package format 2, `host.commands.invoke` version 1, `plugin.processImage` and `plugin.runTask`. This release requires API 2; replace older API 1 panels with this rebuilt package.
 2. Choose **Plugins → Manage Plugins → Browse**, then select **PhotoCraft-Rembg.pcplugin**. Review its requested access and bundled native-code permission, then install.
 3. Open an image and choose **Plugins → Rembg Background Removal**.
 4. Choose a model and result. Each model name includes a short explanation. For an optional model, select **Check model status** to see its size, installation status and terms, then **Download selected model**. Model actions work without an image open. Leave optional edge controls at their defaults initially, then select **Generate preview**.
@@ -88,9 +90,10 @@ The worker extracts the bundled private Python runtime into a per-job temporary 
 ## Independent source project
 
 ```text
-package.json                  General package-v2 native backend declaration
-extension/manifest.json       Panel identity, controls, defaults and permission
-extension/src/lib.rs          Independent WASM ABI and validated button handler
+authoring.json                Panel API 2 and package-v2 authoring source
+extension/build.rs            Validates authoring and generates manifest/bindings
+extension/src/lib.rs           Typed panel handler and bounded SDK export
+extension/vendor/              Private PhotoCraft API/SDK sources and release hashes
 src/                          Rust native supervisor and generic job validation
 python/                       rembg adapter, composition and Python-side tests
 runtime/                      Pinned private runtime archive, models and provenance
@@ -122,7 +125,7 @@ cargo test --locked
 cargo test --locked --manifest-path extension/Cargo.toml
 cargo clippy --locked --all-targets -- -D warnings
 cargo clippy --locked --manifest-path extension/Cargo.toml --all-targets -- -D warnings
-./scripts/build-plugin.ps1
+./scripts/build-plugin.ps1 -Python python
 ```
 
 Use the scripts' offline mode when all required assets and compiler dependencies are cached. Pass `-Python <path-to-python.exe>` to the fetch/build scripts to select the developer interpreter. The output is **dist/PhotoCraft-Rembg.pcplugin**. Test the final package in PhotoCraft with a clean runtime environment; native unit tests alone cannot establish bundled Python/DLL compatibility. Consult `verification/` for recorded cases, hashes and practical limits.
@@ -162,3 +165,18 @@ owns cache paths, file verification, locking, HTTPS requests and cleanup.
 ## Licenses
 
 The plugin source is MIT. rembg, model weights, CPython, numerical libraries, ONNX Runtime and Microsoft runtime components retain separate terms. The MIT source license does not relicense model weights or proprietary redistributables. Preserve [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md), the original notices in `runtime/licenses/`, Python package license metadata and pinned asset/provenance manifests. The U²-Net checkpoint's older conversion history is not fully documented; its rembg release mirror does not change the upstream model terms.
+
+## API 2 compatibility (1.2.0)
+
+This release requires a PhotoCraft host supporting **panel API 2**, package format 2 and
+the `host.commands.invoke` capability at version 1. API 1 panels are no longer supported.
+The stable plugin id, model choices, processing algorithms and worker protocols are preserved.
+The native image/task protocol remains version 1; it is separate from the panel API.
+
+Edit `authoring.json` for both the panel descriptor and archive metadata. The panel's
+build script validates it with the private SDK and generates the embedded descriptor and
+bindings into Cargo output. The package builder derives its root `package.json` from the
+same source. `extension/vendor/` contains this project's SDK/API sources and their
+`SDK-RELEASE.json` hashes. Builds require no PhotoCraft source checkout or sibling plugin.
+The SDK handles bounded ABI buffers and API 2 event validation, including additive host
+metadata. Failed/unknown/observer events propose no processing and preserve panel state.

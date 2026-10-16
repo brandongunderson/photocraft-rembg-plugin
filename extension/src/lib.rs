@@ -1,21 +1,37 @@
-//! Independent data-only panel using PhotoCraft's public image-processing capability.
 #![deny(unsafe_code)]
-#![deny(
-    clippy::unwrap_used,
-    clippy::expect_used,
-    clippy::panic,
-    clippy::unimplemented,
-    clippy::todo,
-    clippy::unreachable
-)]
+use photocraft_plugin_sdk::api::{
+    ApiError, CommandInvocation, ErrorCode, EventRequest, PanelResponse, Result,
+};
+use photocraft_plugin_sdk::serde_json::{self, Value, json};
 
-use std::io::{self, Write};
-use std::sync::Mutex;
+pub mod bindings {
+    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+}
+#[cfg(test)]
+const MANIFEST: &str = bindings::MANIFEST_JSON;
 
-use serde_json::{Value, json};
+fn reply(request: &EventRequest, message: &str) -> Result<PanelResponse> {
+    Ok(PanelResponse {
+        state: request.state.clone(),
+        message: message.into(),
+        ..PanelResponse::default()
+    })
+}
 
-const MANIFEST: &str = include_str!("../manifest.json");
-const MAX_JSON_BYTES: usize = 256 * 1024;
+fn effect(state: Value, message: &str, command: &str, params: Value) -> Result<PanelResponse> {
+    Ok(PanelResponse {
+        state,
+        message: message.into(),
+        commands: vec![CommandInvocation {
+            command: command.into(),
+            params: params.as_object().cloned().ok_or_else(|| {
+                ApiError::new(ErrorCode::InvalidJson, "Invalid processing options.")
+            })?,
+        }],
+        ..PanelResponse::default()
+    })
+}
+
 const MODEL_CATALOG: &str = include_str!("../../runtime/model-catalog.json");
 
 fn model_choices() -> Option<Vec<(String, String)>> {
@@ -49,10 +65,6 @@ const OUTPUTS: &[(&str, &str)] = &[
     ("Subject mask", "mask"),
 ];
 
-fn reply(request: &Value, message: &str) -> Value {
-    json!({"state": request.get("state").unwrap_or(&Value::Null), "message": message, "commands": []})
-}
-
 fn choice<'a>(values: &Value, key: &str, choices: &'a [(&str, &str)]) -> Option<&'a str> {
     match values.get(key) {
         None => choices.first().map(|(_, id)| *id),
@@ -77,17 +89,8 @@ fn integer(values: &Value, key: &str, default: u64, maximum: u64) -> Option<u64>
     }
 }
 
-fn handle(request: &Value) -> Value {
-    let Some(object) = request.as_object() else {
-        return reply(request, "Invalid event request.");
-    };
-    if object
-        .keys()
-        .any(|key| !matches!(key.as_str(), "event" | "document" | "values" | "state"))
-    {
-        return reply(request, "Unknown event request field.");
-    }
-    let Some(event) = request["event"].as_str().filter(|event| {
+fn handle_event(request: &EventRequest) -> Result<PanelResponse> {
+    let Some(event) = Some(request.event.as_str()).filter(|event| {
         matches!(
             *event,
             "remove" | "model_status" | "model_download" | "model_remove"
@@ -98,7 +101,7 @@ fn handle(request: &Value) -> Value {
             "Choose Generate preview or one of the model actions.",
         );
     };
-    let Some(values) = request.get("values").filter(|value| value.is_object()) else {
+    let Some(values) = Some(&request.values).filter(|value| value.is_object()) else {
         return reply(request, "Panel values must be an object.");
     };
     if values.as_object().is_some_and(|values| {
@@ -133,10 +136,14 @@ fn handle(request: &Value) -> Value {
         _ => None,
     };
     if let Some((action, message)) = task {
-        return json!({"state":request.get("state").unwrap_or(&Value::Null), "message":message,
-            "commands":[{"command":"plugin.runTask","params":{"options":{"action":action,"model":model}}}]});
+        return effect(
+            request.state.clone(),
+            message,
+            "plugin.runTask",
+            json!({"options":{"action":action,"model":model}}),
+        );
     }
-    let Some(document) = request.get("document").and_then(Value::as_object) else {
+    let Some(document) = request.document.as_object() else {
         return reply(
             request,
             "Open an RGB or grayscale image before generating a preview. Model downloads work without an image.",
@@ -194,146 +201,89 @@ fn handle(request: &Value) -> Value {
             "Alpha matting is limited to 4 megapixels. Turn it off or resize a copy before continuing.",
         );
     }
-    let mut state = request
-        .get("state")
-        .and_then(Value::as_object)
-        .cloned()
-        .unwrap_or_default();
+    let mut state = request.state.as_object().cloned().unwrap_or_default();
     let runs = state
         .get("runs")
         .and_then(Value::as_u64)
         .unwrap_or(0)
         .saturating_add(1);
     state.insert("runs".to_owned(), json!(runs));
-    json!({
-        "state": state,
-        "message": "Generating a local preview. Compare the result, then Apply or Discard.",
-        "commands": [{"command": "plugin.processImage", "params": {
-            "processor": "native", "width": width, "height": height, "preview": true,
-            "options": {"model": model, "output": output, "alpha_matting": alpha_matting,
-                "foreground_threshold": foreground_threshold, "background_threshold": background_threshold,
-                "erode_size": erode_size, "post_process_mask": post_process_mask}
-        }}]
-    })
+    effect(
+        json!(state),
+        "Generating a local preview. Compare the result, then Apply or Discard.",
+        "plugin.processImage",
+        json!({
+            "processor":"native", "width":width, "height":height, "preview":true,
+            "options":{"model":model,"output":output,"alpha_matting":alpha_matting,
+                "foreground_threshold":foreground_threshold,"background_threshold":background_threshold,
+                "erode_size":erode_size,"post_process_mask":post_process_mask}
+        }),
+    )
 }
 
-#[derive(Default)]
-struct Buffers {
-    request: Vec<u8>,
-    response: Vec<u8>,
-}
-
-impl Buffers {
-    fn allocate(&mut self, size: usize) -> Option<*mut u8> {
-        if size == 0 || size > MAX_JSON_BYTES {
-            return None;
-        }
-        if size > self.request.len() {
-            self.request
-                .try_reserve_exact(size - self.request.len())
-                .ok()?;
-        }
-        self.request.resize(size, 0);
-        Some(self.request.as_mut_ptr())
-    }
-
-    fn handle(&mut self, pointer: *const u8, size: usize) -> Option<&[u8]> {
-        if pointer != self.request.as_ptr()
-            || size == 0
-            || size != self.request.len()
-            || size > MAX_JSON_BYTES
-        {
-            return None;
-        }
-        let request = serde_json::from_slice::<Value>(self.request.get(..size)?);
-        let response = match request {
-            Ok(request) => handle(&request),
-            Err(_) => {
-                json!({"state": null, "message": "Invalid event request JSON.", "commands": []})
-            }
-        };
-        self.response.clear();
-        serde_json::to_writer(LimitedWriter(&mut self.response), &response).ok()?;
-        Some(&self.response)
-    }
-}
-
-struct LimitedWriter<'a>(&'a mut Vec<u8>);
-
-impl Write for LimitedWriter<'_> {
-    fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
-        let length = self
-            .0
-            .len()
-            .checked_add(bytes.len())
-            .ok_or(io::ErrorKind::InvalidData)?;
-        if length > MAX_JSON_BYTES {
-            return Err(io::ErrorKind::InvalidData.into());
-        }
-        self.0
-            .try_reserve(bytes.len())
-            .map_err(|_| io::Error::from(io::ErrorKind::OutOfMemory))?;
-        self.0.extend_from_slice(bytes);
-        Ok(bytes.len())
-    }
-
-    fn flush(&mut self) -> io::Result<()> {
-        Ok(())
-    }
-}
-
-static BUFFERS: Mutex<Buffers> = Mutex::new(Buffers {
-    request: Vec::new(),
-    response: Vec::new(),
-});
-
-fn packed(bytes: &[u8]) -> u64 {
-    let Ok(pointer) = u32::try_from(bytes.as_ptr() as usize) else {
-        return 0;
-    };
-    let Ok(length) = u32::try_from(bytes.len()) else {
-        return 0;
-    };
-    (u64::from(length) << 32) | u64::from(pointer)
-}
-
-// These attributes export ABI symbols only; there are no unsafe pointer dereferences.
-#[allow(unsafe_code)]
-#[unsafe(no_mangle)]
-pub extern "C" fn pce_api_version() -> u32 {
-    1
-}
-
-#[allow(unsafe_code)]
-#[unsafe(no_mangle)]
-pub extern "C" fn pce_manifest() -> u64 {
-    packed(MANIFEST.as_bytes())
-}
-
-#[allow(unsafe_code)]
-#[unsafe(no_mangle)]
-pub extern "C" fn pce_alloc(size: u32) -> *mut u8 {
-    let Ok(mut buffers) = BUFFERS.lock() else {
-        return std::ptr::null_mut();
-    };
-    buffers
-        .allocate(size as usize)
-        .unwrap_or(std::ptr::null_mut())
-}
-
-#[allow(unsafe_code)]
-#[unsafe(no_mangle)]
-pub extern "C" fn pce_handle(pointer: *const u8, size: u32) -> u64 {
-    let Ok(mut buffers) = BUFFERS.lock() else {
-        return 0;
-    };
-    buffers.handle(pointer, size as usize).map_or(0, packed)
-}
+photocraft_plugin_sdk::export_plugin!(bindings::MANIFEST_JSON, handle_event);
 
 #[cfg(test)]
 #[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
+
+    // Existing feature cases also pass through the actual API-2 SDK request/response boundary.
+    fn handle(value: &Value) -> Value {
+        let mut input = value.clone();
+        if let Some(object) = input.as_object_mut() {
+            object.entry("apiVersion").or_insert(json!(2));
+            object
+                .entry("host")
+                .or_insert(json!({"version":1,"capabilities":[]}));
+        }
+        let input = serde_json::to_vec(&input).unwrap();
+        let mut guest = photocraft_plugin_sdk::GuestBuffers::new();
+        let buffer = guest.allocate(input.len()).unwrap();
+        buffer.copy_from_slice(&input);
+        let pointer = buffer.as_ptr();
+        match guest.respond(pointer, input.len(), handle_event) {
+            Ok(bytes) => serde_json::from_slice(bytes).unwrap(),
+            Err(error) => {
+                json!({"state": value.get("state").unwrap_or(&Value::Null), "message":error.message,"commands":[]})
+            }
+        }
+    }
+
+    #[test]
+    fn api2_metadata_is_additive_and_legacy_envelopes_are_rejected() {
+        assert_eq!(photocraft_guest_api_version(), 2);
+        let manifest: Value = serde_json::from_str(MANIFEST).unwrap();
+        assert_eq!(manifest["apiVersion"], 2);
+        assert_eq!(
+            manifest["capabilities"]["required"],
+            json!([{"id":"host.commands.invoke","minVersion":1}])
+        );
+        let base = json!({"apiVersion":2,"host":{"version":1,"capabilities":[]},
+            "event":"init","values":{},"document":null,"state":{"saved":7},
+            "compatibility":{"panelApi":2,"hostApi":1,"negotiated":{"available":[{"id":"host.commands.invoke","version":1}],"unavailableOptional":[]}},
+            "futureHostMetadata":{"added":true}});
+        EventRequest::parse(&serde_json::to_vec(&base).unwrap()).unwrap();
+        let response = handle(&base);
+        assert_eq!(response["state"], base["state"]);
+        assert_eq!(response["commands"], json!([]));
+        for event in [
+            "init",
+            "change",
+            "document_changed",
+            "host_response",
+            "unrecognized",
+        ] {
+            let mut input = base.clone();
+            input["event"] = json!(event);
+            assert_eq!(handle(&input)["commands"], json!([]));
+        }
+        let mut old = base.clone();
+        old["apiVersion"] = json!(1);
+        assert!(EventRequest::parse(&serde_json::to_vec(&old).unwrap()).is_err());
+        let old = json!({"event":"init","values":{},"state":{}});
+        assert!(EventRequest::parse(&serde_json::to_vec(&old).unwrap()).is_err());
+    }
 
     fn request() -> Value {
         json!({"event":"remove","document":{"id":1,"width":40,"height":30,"revision":0},"values":{},"state":{"saved":1}})
@@ -358,7 +308,7 @@ mod tests {
         let manifest: Value = serde_json::from_str(MANIFEST).unwrap();
         assert_eq!(manifest["id"], "org.photocraft.rembg");
         assert_eq!(manifest["name"], "Rembg Background Removal");
-        assert_eq!(manifest["version"], "1.1.0");
+        assert_eq!(manifest["version"], "1.2.0");
         assert_eq!(
             manifest["permissions"],
             json!({"documentRead":true,"commands":["plugin.processImage","plugin.runTask"]})
@@ -569,30 +519,5 @@ mod tests {
             input["values"] = values;
             assert_rejected(&input);
         }
-        let mut input = request();
-        input["path"] = json!("another-plugin");
-        assert_rejected(&input);
-    }
-
-    #[test]
-    fn abi_storage_rejects_bad_lengths_pointers_and_json_without_dereferencing() {
-        let mut buffers = Buffers::default();
-        assert!(buffers.allocate(0).is_none());
-        assert!(buffers.allocate(MAX_JSON_BYTES + 1).is_none());
-        let pointer = buffers.allocate(2).unwrap();
-        assert!(buffers.handle(std::ptr::null(), 2).is_none());
-        assert!(buffers.handle(pointer, 1).is_none());
-        buffers.request.copy_from_slice(b"{!");
-        let response: Value = serde_json::from_slice(buffers.handle(pointer, 2).unwrap()).unwrap();
-        assert_eq!(response["commands"], json!([]));
-    }
-
-    #[test]
-    fn response_writer_is_bounded() {
-        let mut bytes = Vec::new();
-        let mut writer = LimitedWriter(&mut bytes);
-        writer.write_all(&vec![b'x'; MAX_JSON_BYTES]).unwrap();
-        assert!(writer.write_all(b"x").is_err());
-        assert_eq!(bytes.len(), MAX_JSON_BYTES);
     }
 }

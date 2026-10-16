@@ -89,3 +89,5 @@ or copied as runtime dependencies.
 and used here under MIT. The original ArtCraft Team and PhotoCraft contributors'
 copyright notice and MIT terms for the copied starter/helper are retained in
 `licenses/PhotoCraft-MIT.txt`.
+
+- **PhotoCraft Plugin API and SDK 0.1**, MIT OR Apache-2.0. Privately vendored in `extension/vendor/`, with source hashes in `SDK-RELEASE.json`. Both license texts are retained in source and packaged under `licenses/photocraft-sdk/`. Rust dependency versions remain pinned by `extension/Cargo.lock`.

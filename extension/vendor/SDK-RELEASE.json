@@ -1,0 +1,183 @@
+{
+  "files": [
+    {
+      "bytes": 527,
+      "path": "plugin-api/Cargo.toml",
+      "sha256": "c0930a513e511992b078a9d576afce0ec92d1fc0a68b02ce0b376802303d51cd"
+    },
+    {
+      "bytes": 10351,
+      "path": "plugin-api/LICENSE-APACHE",
+      "sha256": "eb3d7b5485466acbd81f2b496f595ab637d2792e268206b27d99e793bdb67549"
+    },
+    {
+      "bytes": 1123,
+      "path": "plugin-api/LICENSE-MIT",
+      "sha256": "77c414bd870a0cc1a5ec06e7aeae0d379713d1d5d2d38e8d0903002e4d572537"
+    },
+    {
+      "bytes": 1713,
+      "path": "plugin-api/README.md",
+      "sha256": "090bfcebcfc86fa48cbec88422d5f4ac8ecc4d3d362735ca4e88262cfe17d844"
+    },
+    {
+      "bytes": 659,
+      "path": "plugin-api/examples/export_schemas.rs",
+      "sha256": "8eec821e923b7423b83fb5234829b11351fdf7b685d4dfc354121bc230c6e057"
+    },
+    {
+      "bytes": 11506,
+      "path": "plugin-api/schemas/authoring-v1.schema.json",
+      "sha256": "d1a9bead10d968e4959dce3d9239008945d7d26096dec8372d067b8bab0f463f"
+    },
+    {
+      "bytes": 1227,
+      "path": "plugin-api/schemas/host-api-v1.schema.json",
+      "sha256": "4ff386f90759b055a94e3a272f0fce374e9606c1cd573d4cb7f8932faab01ca5"
+    },
+    {
+      "bytes": 1223,
+      "path": "plugin-api/schemas/layers-edit-v1.schema.json",
+      "sha256": "6be14c3a54bcebde0465d085ef5d8e271ed5a7ae365b0b5cd5c7c9e09e600354"
+    },
+    {
+      "bytes": 386,
+      "path": "plugin-api/schemas/layers-edited-v1.schema.json",
+      "sha256": "27e60ee040e818b2de22cf0170befba9b4b1eefff9c79a2b0d6450d1cb992392"
+    },
+    {
+      "bytes": 875,
+      "path": "plugin-api/schemas/layers-read-v1.schema.json",
+      "sha256": "c9e049144fc26929311feeb1bec105eedbcc4059b1e2c39e53ffeea786dba213"
+    },
+    {
+      "bytes": 2429,
+      "path": "plugin-api/schemas/layers-snapshot-v1.schema.json",
+      "sha256": "edccf406baa4c0b940f15da46b0667428094885be0a84a9a4c3ed6ffb5fd6717"
+    },
+    {
+      "bytes": 1296,
+      "path": "plugin-api/schemas/package-v2.schema.json",
+      "sha256": "c8ef7ec333d79fb5e9557c6c8822939d26e0776f24c7e1a0e8cd02dd9c773075"
+    },
+    {
+      "bytes": 4958,
+      "path": "plugin-api/schemas/panel-v2-event.schema.json",
+      "sha256": "11b42d58d38207b9b3cd8265bf2d706843ed4cfe4b842699a9d33f9e08d022fc"
+    },
+    {
+      "bytes": 2555,
+      "path": "plugin-api/schemas/panel-v2-response.schema.json",
+      "sha256": "71a71e297e62d02bc070016ca4e616170e80c9d38a06d8d761f668a22532cf8a"
+    },
+    {
+      "bytes": 9507,
+      "path": "plugin-api/schemas/panel-v2.schema.json",
+      "sha256": "82bbeabc291cb8f898ce8acd6c532f0f4f525440da4e39c350d905ce8042e1a2"
+    },
+    {
+      "bytes": 3642,
+      "path": "plugin-api/schemas/worker-v2-guest-frame.schema.json",
+      "sha256": "248296af1912e81453500993bf2d4fdc4f17eb62cce57a480164c5343abe6a84"
+    },
+    {
+      "bytes": 2496,
+      "path": "plugin-api/schemas/worker-v2-host-frame.schema.json",
+      "sha256": "554e4c70816228fca6087364998d1fa72d554651613894f7be780deebebbc0e5"
+    },
+    {
+      "bytes": 2357,
+      "path": "plugin-api/schemas/worker-v2.schema.json",
+      "sha256": "5a8c5d3ac68904d02097516e913c5a3cae4e01f8b4dc5b50bb4f5efc84f8d654"
+    },
+    {
+      "bytes": 5850,
+      "path": "plugin-api/src/authoring.rs",
+      "sha256": "6d062224256005e0d99108ad05fba6d7ced51b4925479ce0926a4421a2c89263"
+    },
+    {
+      "bytes": 8295,
+      "path": "plugin-api/src/capabilities.rs",
+      "sha256": "21eb43d049e0928671a72466afeeff768b47c83e4acf32e51de2c19d868738f8"
+    },
+    {
+      "bytes": 6418,
+      "path": "plugin-api/src/contributions.rs",
+      "sha256": "b446b0083b169ea75554ae461fbbd2c19ed3c5d6fd9dfe05c268d5513a95e619"
+    },
+    {
+      "bytes": 8002,
+      "path": "plugin-api/src/descriptor.rs",
+      "sha256": "516ad7a5d90718959160f4f21c36795613fd9eb7f7efdce9f43d6cf6aa3a210d"
+    },
+    {
+      "bytes": 5008,
+      "path": "plugin-api/src/documents.rs",
+      "sha256": "7394755a3080963964144b3e02f76e576dc7dff5a3fb7518be65ad6182547343"
+    },
+    {
+      "bytes": 3877,
+      "path": "plugin-api/src/events.rs",
+      "sha256": "f180f8bcc6fdfd8977686162e874382f3200c5addead6d0777e58337db78dfac"
+    },
+    {
+      "bytes": 3626,
+      "path": "plugin-api/src/lib.rs",
+      "sha256": "53c1ab09cec4404a6ac04d575666a1430d07ce29e9f5b150f63adbdcc1c22146"
+    },
+    {
+      "bytes": 4040,
+      "path": "plugin-api/src/protocol.rs",
+      "sha256": "2f0d6e4c268d1945abd1cf0b8f1d535a1a41a9fffb008060171397c3f8f7d572"
+    },
+    {
+      "bytes": 2058,
+      "path": "plugin-api/src/schema.rs",
+      "sha256": "b5788c446f884888f73fba54df9437594c190e4ef8953d0725523cd9811f2987"
+    },
+    {
+      "bytes": 14006,
+      "path": "plugin-api/src/worker.rs",
+      "sha256": "6adaa9cb5cd7351ea1c1916074d09daea7ae8f9aaabfe7b7733bbddf7a1d3bfd"
+    },
+    {
+      "bytes": 12060,
+      "path": "plugin-api/tests/contracts.rs",
+      "sha256": "8f8d4c09c460b49ed24d66da794254b4e0b9c18f337301ca774edd89a216d67c"
+    },
+    {
+      "bytes": 397,
+      "path": "plugin-sdk/Cargo.toml",
+      "sha256": "20ad21a046f4facd9db3bf446147ea77bc3c0edcc1e3c0286f4834c7c7fc1539"
+    },
+    {
+      "bytes": 10351,
+      "path": "plugin-sdk/LICENSE-APACHE",
+      "sha256": "eb3d7b5485466acbd81f2b496f595ab637d2792e268206b27d99e793bdb67549"
+    },
+    {
+      "bytes": 1123,
+      "path": "plugin-sdk/LICENSE-MIT",
+      "sha256": "77c414bd870a0cc1a5ec06e7aeae0d379713d1d5d2d38e8d0903002e4d572537"
+    },
+    {
+      "bytes": 1745,
+      "path": "plugin-sdk/README.md",
+      "sha256": "e44e1628c2f898a33c59a245d45963553a711c66e32e4f5b75b39fc974c2bba8"
+    },
+    {
+      "bytes": 3456,
+      "path": "plugin-sdk/src/authoring.rs",
+      "sha256": "7fab17ab235d58ead603fc8e55197e398ee180f09fbe9e1668131b1aebe3d5a9"
+    },
+    {
+      "bytes": 7401,
+      "path": "plugin-sdk/src/lib.rs",
+      "sha256": "fb935c2da0fef087d1f2421571c62c50d17df195754fd443a04711f3c5e0bf5d"
+    }
+  ],
+  "formatVersion": 1,
+  "packageVersion": 2,
+  "panelApi": 2,
+  "sdkVersion": "0.1.0"
+}
