@@ -2,7 +2,7 @@
 
 A PhotoCraft plugin using the [rembg Python library](https://github.com/danielgatis/rembg/tree/v2.0.85). Version **1.2.0** bundles rembg **2.0.85**, a private CPython 3.13 runtime, CPU inference libraries, and two local models. Download additional models through the plugin's pinned catalog. All controls and the comparison preview appear inside PhotoCraft; the package supplies its Python runtime.
 
-[Source repository](https://github.com/brandongunderson/photocraft-rembg-plugin)
+[Source repository](https://github.com/brandongunderson/photocraft-rembg-plugin) · [Changelog](CHANGELOG.md)
 
 [Download the latest plugin](https://github.com/brandongunderson/photocraft-rembg-plugin/releases/latest/download/PhotoCraft-Rembg.pcplugin) · [All releases](https://github.com/brandongunderson/photocraft-rembg-plugin/releases)
 
@@ -17,7 +17,7 @@ You can install this alongside [Background Removal](https://github.com/brandongu
 5. Drag the comparison divider to inspect the result. **Fit**, **100%**, and pan help inspect edges. Generating a preview leaves the source unchanged.
 6. Choose a destination and **Apply**, or select **Discard**. The default destination creates a new unsaved result tab. Because this plugin preserves dimensions, a new raster layer is also available. Layer Apply is undoable; the original layers remain beneath the result and are hidden in the same history step so transparency matches the preview. Undo restores their visibility.
 
-Use **Manage Plugins** to disable, replace, or remove the plugin. Keep its stable id when publishing updates. Replacing an installed package requires the manager's replacement option and native-code consent. The original downloaded package is no longer needed after installation.
+Use **Manage Plugins** to disable, update, or remove the plugin. Review native-code access and choose **Update plugin** for a newer package; same-version reinstall/repair is under **Advanced**. Keep its stable id when publishing updates. The original downloaded package is no longer needed after installation.
 
 ## Models and settings
 
@@ -132,7 +132,7 @@ Use the scripts' offline mode when all required assets and compiler dependencies
 
 The runtime builder uses pinned CPython and wheel inputs, then writes the resulting ZIP hash into `runtime/runtime.json`. ZIP bytes can differ between developer Python/zlib versions. The verified release archive used Python 3.12.14 with zlib 1.3.2 as its producer; the embedded interpreter remains CPython 3.13.16. Use the same producer to reproduce that archive byte for byte. Other producers require validation of the newly built package.
 
-To change a control, update the embedded manifest and its handler together. To change optional models, update `runtime/model-catalog.json`, the explicit Python session registry, validation and notices. Run `python scripts/sync-panel-models.py` to regenerate the dropdown, then rebuild. Confirm new weights' identity and terms from primary sources. Keep unknown options rejected. Rebuild the WASM after any manifest/catalog change; editing a loose JSON file after installation has no effect. Update the plugin release version and reinstall with replacement enabled.
+To change a control, update the embedded manifest and its handler together. To change optional models, update `runtime/model-catalog.json`, the explicit Python session registry, validation and notices. Run `python scripts/sync-panel-models.py` to regenerate the dropdown, then rebuild. Confirm new weights' identity and terms from primary sources. Keep unknown options rejected. Rebuild the WASM after any manifest/catalog change; editing a loose JSON file after installation has no effect. Bump the plugin version for a release, then review the new package and choose **Update plugin**.
 
 ## Package and worker contract
 

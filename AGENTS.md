@@ -14,3 +14,7 @@ Run both Cargo workspaces' tests, clippy and formatting, then build the actual r
 Check it with the current photocraft-plugin tool and test install/restart/preview/Apply/Undo
 in a disposable host store. Do not modify a user's installation or publish without authorization.
 Retain all dependency and model license notices. Report actual checks and untested behavior.
+
+Maintain CHANGELOG.md for this plugin's releases, with version/date, behavior changes and
+compatibility notes. Keep shared platform history in the editor repository. Record future
+changes under Unreleased until publishing a tag; do not retag a release for documentation edits.
